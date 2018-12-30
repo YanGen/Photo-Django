@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>H5 Upload</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .upload {
+            position: relative;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .upload button {
+            display: block;
+            width: 100%;
+            height: 50px;
+            background-color: orange;
+            border: none;
+        }
+
+        .upload input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: block;
+            width: 100%;
+            height: 50px;
+            opacity: 0;
+        }
+
+        .upload img {
+            margin: 0 auto;
+            display: block;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="upload">
+        <button>上传文件(base64)</button>
+        <input type="file" accept="video/*" capture="camcorder" id="upload">
+    </div>
+    <div class="upload">
+        <button>上传文件(二进制)</button>
+        <input type="file" accept="video/*" capture="camcorder" id="upload1">
+    </div>
+    <script>
+        var upload = {
+            init: function() {
+                this.event();
+            },
+            event: function() {
+                var _this = this;
+                // 方式一：采用FileReader方式
+                document.getElementById('upload').addEventListener('change', function(event) {
+                        var that = this;
+                        var file = event.target.files[0];
+                        var reader = new FileReader();
+                        reader.onload = function(e) { //文件读取成功完成时触发
+                            var video = document.createElement('video');
+                            video.setAttribute('controls', true)
+                            video.src = this.result; //this.result为base64文件路径
+                            _this.insertAfter(video, that);
+                        }
+                        reader.readAsDataURL(this.files[0]); // 读出 base64
+                    })
+                    // 方式二：采用二进制形式
+                document.getElementById('upload1').addEventListener('change', function(e) {
+                    var that = this;
+                    var file = e.target.files[0];
+                    var blob = new Blob([file]), // 文件转化成二进制文件
+                        url = URL.createObjectURL(blob); //转化成url
+                    var video = document.createElement('video');
+                    video.setAttribute('controls', true);
+                    video.setAttribute('src', url);
+                    _this.insertAfter(video, that);
+                    video.onload = function(e) {
+                        URL.revokeObjectURL(this.src); // 释放createObjectURL创建的对象
+                    }
+                })
+            },
+            insertAfter: function(newElement, targetElement) {
+                var parent = targetElement.parentNode;
+                if (parent.lastChild == targetElement) {
+                    // 如果最后的节点是目标元素，则直接添加。因为默认是最后
+                    parent.appendChild(newElement);
+                } else {
+                    parent.insertBefore(newElement, targetElement.nextSibling);
+                    //如果不是，则插入在目标元素的下一个兄弟节点 的前面。也就是目标元素的后面
+                }
+            }
+        }
+
+        upload.init();
+    </script>
+</body>
+
+</html>

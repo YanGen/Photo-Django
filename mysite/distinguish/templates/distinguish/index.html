@@ -1,0 +1,190 @@
+
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>post</title>
+        {% load staticfiles %}
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta charset="utf-8">
+		<link href="http://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/fileinput.css' %}" media="all"/>
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/fileinput.js' %}"></script>
+        <script src="{% static 'js/bootstrap-fileinput.zh.js' %}"></script>
+
+	<body>
+
+<div class="container " style="">
+
+    <div class=" div_divider">
+        <!-- 分割线 -->
+        <div class="row">
+            <div class="col-xs-12">
+
+                        <div id="legend" class="">
+                            <legend class="">上传页</legend>
+                        </div>
+                        <br>
+                <form action="upload/" class="form-horizontal center-block text-center" role="form" id="form" enctype = "multipart/form-data" method="post">
+                    <div class="container">
+                    {% csrf_token %}
+
+                        <div class="row">
+
+                            <div class="col-sm-6 col-xs-8 text-center">
+                                <select class="form-control" name="engtype" id="engtype">
+                                    <option value="2">高精度</option>
+                                    <option value="1">低精度</option>
+                                </select>
+                            </div>
+
+                            <div class="col-sm-6 col-xs-8">
+                                <select class="form-control" name="distype" id="distype">
+                                        <option value="1">中文文本</option>
+                                        <option value="2">英文文本</option>
+                                        <option value="4">手写文本</option>
+                                        <option value="3">带干扰验证码</option>
+                                </select>
+                            </div>
+                    </div>
+
+                        <br>
+
+                    <div class = "row" id="imgInputRow">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2  col-xs-1"></label>
+
+                            <!-- File Upload -->
+                            <div class="col-sm-6 col-xs-8">
+                                <input type="file" id="imgfile" name="picture" data-allowed-file-extensions='["jpg","gif","png"]' multiple />
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="row">
+
+                        <div class="form-group col-xs-8 col-sm-8">
+                            <label class="control-label"></label>
+
+                            <!-- Button -->
+                            <div class="controls">
+                                <!--<button id="submit" type="button" class="btn btn-default">提交</button>-->
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+<hr>
+<div class="container">
+        <p class="text-muted" id="resultContent"></p>
+</div>
+
+
+	</body>
+	 <script type="text/javascript">
+
+
+
+
+
+	 $('#imgfile').fileinput({
+         language: 'zh',
+         uploadUrl: 'upload/?engtype=2&distype=1',
+         showCaption: true,
+         showUpload: false,
+         showRemove: true,
+         showClose: false,
+         maxFileSize:2048,
+         maxFileCount:2,
+         layoutTemplates:{
+             actionDelete: ''
+         },
+         browseClass: 'btn btn-primary'
+     })
+     <!--选择文件处理方法-->
+     $("#imgfile").on("filebatchselected", function(event, files) {
+        $("#imgfile").fileinput({
+            uploadUrl:'upload/?engtype='+$("#engtype").val()+'&distype='+$("#distype").val(),
+            language: 'zh',
+             showCaption: true,
+             showUpload: false,
+             showRemove: true,
+             showClose: false,
+             maxFileSize:2048,
+             maxFileCount:2,
+             layoutTemplates:{
+                 actionDelete: ''
+             },
+             browseClass: 'btn btn-primary'
+        });
+        $('#imgfile').fileinput("upload");
+   });
+
+     //上传成功处理方法
+     $("#imgfile").on("fileuploaded", function (event, data, previewId, index) {
+                var result = data.response; //后台返回的json
+                if(result.success){
+                var mobile_flag = isMobile(); // true为PC端，false为手机端
+
+                if(mobile_flag){
+                alert("电脑");
+                    $("#resultContent").html(result.data.result);
+
+                }else{
+                    window.location.href="/result/?result="+result.data.result;
+                }
+
+                }
+            })
+
+
+
+      $("#submit").click(function () {//非submit按钮点击后进行验证，如果是submit则无需此句直接验证
+        $('#imgfile').fileinput("upload");
+    })
+
+
+
+
+
+    function isMobile() {
+        var userAgentInfo = navigator.userAgent;
+
+        var mobileAgents = [ "Android", "iPhone", "SymbianOS", "Windows Phone", "iPad","iPod"];
+
+        var mobile_flag = false;
+
+        //根据userAgent判断是否是手机
+        for (var v = 0; v < mobileAgents.length; v++) {
+            if (userAgentInfo.indexOf(mobileAgents[v]) > 0) {
+                mobile_flag = true;
+                break;
+            }
+        }
+
+         var screen_width = window.screen.width;
+         var screen_height = window.screen.height;
+
+         //根据屏幕分辨率判断是否是手机
+         if(screen_width < 500 && screen_height < 800){
+             mobile_flag = true;
+         }
+
+         return mobile_flag;
+    }
+
+
+    </script>
+
+</html>
